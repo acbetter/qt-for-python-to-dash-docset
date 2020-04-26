@@ -35,12 +35,13 @@ def get_guides():
 def get_modules():
     # qtforpython/modules.html
     soup = BeautifulSoup(open("doc.qt.io/qtforpython/modules.html"), "lxml")
-    i = soup.find_all("a", class_="reference external")
+    i = soup.find_all("a", class_="reference internal")
     for x in i:
         # handle 404
         if not str(x["href"]).startswith("https://doc.qt.io"):
+            t = str(x["href"]).split("#")
             yield (x.get_text(), 'Module',
-                   os.path.join("qtforpython", x["href"]))
+                   os.path.join("qtforpython", t[0]))
 
 
 def get_classes(modules: list):
@@ -104,8 +105,8 @@ def generate_docset():
         dashIndexFilePath="qtforpython/index.html",
         isJavaScriptEnabled=True
     )
-    with open("Qt for Python.docset/Contents/Info.plist", "wb") as file:
-        plistlib.dump(info_plist, file)
+    with open(os.path.join(docset_folder, "Contents/Info.plist"), "wb") as f:
+        plistlib.dump(info_plist, f)
 
 
 def write_to_sqlite(doc_set: list):
@@ -140,5 +141,6 @@ docs.extend(modules)
 docs.extend(classes)
 docs.extend(functions)
 
+generate_docset()
 write_to_sqlite(docs)
 print('Okay! Done! Have fun coding')
