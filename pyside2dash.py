@@ -16,36 +16,37 @@ docset_folder = "Qt_for_Python.docset"
 
 
 def get_guides():
-    # qtforpython/contents.html
+    # https://doc.qt.io/qtforpython/contents.html
     soup = BeautifulSoup(open("doc.qt.io/qtforpython/contents.html"), "lxml")
-    i = soup.find_all("a", class_="reference internal")
-    for x in i:
-        yield (x.get_text(), 'Guide', os.path.join("qtforpython", x["href"]))
-    # qtforpython/tutorials/index.html
-    soup = BeautifulSoup(
-        open("doc.qt.io/qtforpython/tutorials/index.html"), "lxml")
     i = soup.find_all("a", class_="reference internal")
     for x in i:
         # handle 404
         if not str(x["href"]).startswith("https://doc.qt.io"):
-            yield (x.get_text(), 'Guide',
-                   os.path.join("qtforpython/tutorials", x["href"]))
+            yield (x.get_text(), "Guide", os.path.join("qtforpython", x["href"]))
+
+    # https://doc.qt.io/qtforpython/tutorials/index.html
+    soup = BeautifulSoup(open("doc.qt.io/qtforpython/tutorials/index.html"), "lxml")
+    i = soup.find_all("a", class_="reference internal")
+    for x in i:
+        # handle 404
+        if not str(x["href"]).startswith("https://doc.qt.io"):
+            yield (x.get_text(), "Guide", os.path.join("qtforpython/tutorials", x["href"]))
 
 
 def get_modules():
-    # qtforpython/modules.html
+    # https://doc.qt.io/qtforpython/modules.html
     soup = BeautifulSoup(open("doc.qt.io/qtforpython/modules.html"), "lxml")
     i = soup.find_all("a", class_="reference internal")
     for x in i:
         # handle 404
         if not str(x["href"]).startswith("https://doc.qt.io"):
+            # https://doc.qt.io/qtforpython/PySide2/QtCore/index.html#module-PySide2.QtCore
             t = str(x["href"]).split("#")
-            yield (x.get_text(), 'Module',
-                   os.path.join("qtforpython", t[0]))
+            yield (x.get_text(), "Module", os.path.join("qtforpython", t[0]))
 
 
 def get_classes(modules: list):
-    # qtforpython/modules.html
+    # https://doc.qt.io/qtforpython/PySide2/QtWidgets/QAbstractItemDelegate.html
     for m in modules:
         print(m)
         soup = BeautifulSoup(open(os.path.join("doc.qt.io", m[-1])), "lxml")
@@ -55,13 +56,11 @@ def get_classes(modules: list):
             if not str(x["href"]).startswith("https://doc.qt.io"):
                 t = str(x["href"]).split("#")
                 if len(t) == 1 or len(t[1]) == 0:
-                    yield(x.get_text(), 'Class', os.path.join(
-                        os.path.dirname(m[-1]), str(x["href"]).strip("#")))
-# generate docset
+                    yield(x.get_text(), "Class", os.path.join(os.path.dirname(m[-1]), str(x["href"]).strip("#")))
 
 
 def get_function(classes: list):
-    # qtforpython/modules.html
+    # https://doc.qt.io/qtforpython/PySide2/QtWidgets/QAbstractSlider.html#PySide2.QtWidgets.PySide2.QtWidgets.QAbstractSlider.setInvertedControls
     items = {
         "functions": "Function",
         "static-functions": "Function",
@@ -82,21 +81,18 @@ def get_function(classes: list):
                         t = items[tag["id"]]
                     else:
                         t = "Function"
-                        logging.warning(
-                            "ID {} don't exist in records.".format(tag["id"]))
+                        logging.warning("ID {} don't exist in records.".format(tag["id"]))
                     i = tag.find_all("a", class_="reference internal")
                     for x in i:
                         # handle 404
                         if not str(x["href"]).startswith("https://doc.qt.io"):
-                            yield(x.get_text(), t, os.path.join(
-                                os.path.dirname(c[-1]), x["href"]))
+                            yield(x.get_text(), t, os.path.join(os.path.dirname(c[-1]), x["href"]))
 
 
 def generate_docset():
     if os.path.exists(docset_folder):
         shutil.rmtree(docset_folder)
-    shutil.copytree("doc.qt.io", os.path.join(
-        docset_folder, "Contents/Resources/Documents"))
+    shutil.copytree("doc.qt.io", os.path.join(docset_folder, "Contents/Resources/Documents"))
     info_plist = dict(
         CFBundleIdentifier="qtforpython",
         CFBundleName="Qt for Python",
@@ -111,32 +107,30 @@ def generate_docset():
 
 def write_to_sqlite(doc_set: list):
     print('Writing to sqlite.... It may take seconds... Please wait...')
-    conn = sqlite3.connect(os.path.join(
-        docset_folder, 'Contents/Resources/docSet.dsidx'))
+    conn = sqlite3.connect(os.path.join(docset_folder, 'Contents/Resources/docSet.dsidx'))
     cur = conn.cursor()
     try:
         cur.execute('DROP TABLE searchIndex;')
     except sqlite3.OperationalError:
         pass
-    cur.execute('CREATE TABLE searchIndex \
-                (id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);')
-    cur.execute('CREATE UNIQUE INDEX anchor ON searchIndex \
-                (name, type, path);')
+    cur.execute('CREATE TABLE searchIndex (id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);')
+    cur.execute('CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);')
 
     for item in doc_set:
-        cur.executemany('INSERT OR IGNORE INTO searchIndex \
-                        (name, type, path) VALUES (?,?,?)', [item])
+        cur.executemany('INSERT OR IGNORE INTO searchIndex (name, type, path) VALUES (?,?,?)', [item])
         print(item, end='\n')
 
     conn.commit()
     conn.close()
 
 
+guides = list(get_guides())
 modules = list(get_modules())
 classes = list(get_classes(modules))
 functions = list(get_function(classes))
+
 docs = []
-docs.extend(get_guides())
+docs.extend(guides)
 docs.extend(modules)
 docs.extend(classes)
 docs.extend(functions)

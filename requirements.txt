@@ -1,2 +1,5 @@
 lxml
 BeautifulSoup4
+
+pylint
+autopep8

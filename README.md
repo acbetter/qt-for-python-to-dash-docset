@@ -4,17 +4,23 @@
 
 ### Download Site
 
+It may take 1~2 hours. You can change `--wait=0.5` but better don't do this.
+
 ```shell
 wget --execute robots=off --wait=0.5 --force-directories --no-parent --page-requisites --mirror --convert-links --tries=3 https://doc.qt.io/qtforpython/
 ```
 
 ### Run the Script
 
+You need install python3 and `pip install -r requirements.txt` first.
+
 ```shell
 python pyside2dash.py
 ```
 
 ### Set Icon
+
+Manually copy this to your docset folder.
 
 - [icon-16px](https://doc.qt.io/style/pyside-16px.png)
 - [icon-32px](https://doc.qt.io/style/pyside-32px.png)
@@ -32,5 +38,5 @@ tar --exclude='.DS_Store' -cvzf Qt_for_Python.tgz Qt_for_Python.docset
 
 ## License
 
-- [Qt for Python Documentation](https://doc.qt.io/qtforpython/index.html) use [GNU Free Documentation License version 1.3](https://www.gnu.org/licenses/fdl-1.3.en.html).
-- [Qt for Python (PySide2) to Dash Docset](https://github.com/acbetter/qt-for-python-to-dash-docset) use [Apache License Version 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+- [Qt for Python Documentation](https://doc.qt.io/qtforpython/index.html) use [GNU Free Documentation License version 1.3](https://www.gnu.org/licenses/fdl-1.3.en.html)
+- [Qt for Python (PySide2) to Dash Docset](https://github.com/acbetter/qt-for-python-to-dash-docset) use [Apache License Version 2.0 License](https://www.apache.org/licenses/LICENSE-2.0)
