@@ -1,5 +1,9 @@
 # Qt for Python (PySide2) to Dash Docset
 
+❤️ You can download the docset in your Dash App directly. Current version 6.2.2 ❤️
+
+![](./screenshot.jpg)
+
 ## Steps
 
 ### Download Site
