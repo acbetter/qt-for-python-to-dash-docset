@@ -83,7 +83,7 @@ def functions_single(c):
         "id3": "Function"
     }
     res_ = []
-    soup = BeautifulSoup(open(os.path.join("./doc.qt.io", c[-1])), "lxml")
+    soup = BeautifulSoup(open(os.path.join("./doc.qt.io", c[-1]), encoding="utf-8"), "lxml")
     soup = soup.find("body")
     synopsis = soup.find(id="synopsis")
     if not synopsis:
